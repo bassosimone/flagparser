@@ -36,7 +36,7 @@ type Parser struct {
 	//
 	// With permutation, this command line would become:
 	//
-	// 	-kv -v foreach git status
+	// 	-kx -v foreach git status
 	//
 	// This is not the desired behavior if the foreach subcommand
 	// takes another command and its options as arguments.
