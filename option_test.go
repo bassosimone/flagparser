@@ -67,3 +67,156 @@ func TestOptionType(t *testing.T) {
 		})
 	}
 }
+
+func Test_NewOptionWithArgumentNone(t *testing.T) {
+	t.Run("short only", func(t *testing.T) {
+		options := NewOptionWithArgumentNone('v', "")
+		if assert.Len(t, options, 1) {
+			assert.Equal(t, &Option{
+				Prefix: "-",
+				Name:   "v",
+				Type:   OptionTypeGroupableArgumentNone,
+			}, options[0])
+		}
+	})
+
+	t.Run("long only", func(t *testing.T) {
+		options := NewOptionWithArgumentNone(0, "verbose")
+		if assert.Len(t, options, 1) {
+			assert.Equal(t, &Option{
+				Prefix: "--",
+				Name:   "verbose",
+				Type:   OptionTypeStandaloneArgumentNone,
+			}, options[0])
+		}
+	})
+
+	t.Run("short and long", func(t *testing.T) {
+		options := NewOptionWithArgumentNone('v', "verbose")
+		if assert.Len(t, options, 2) {
+			assert.Equal(t, &Option{
+				Prefix: "-",
+				Name:   "v",
+				Type:   OptionTypeGroupableArgumentNone,
+			}, options[0])
+			assert.Equal(t, &Option{
+				Prefix: "--",
+				Name:   "verbose",
+				Type:   OptionTypeStandaloneArgumentNone,
+			}, options[1])
+		}
+	})
+
+	t.Run("no options", func(t *testing.T) {
+		options := NewOptionWithArgumentNone(0, "")
+		assert.Nil(t, options)
+	})
+}
+
+func Test_NewEarlyOption(t *testing.T) {
+	t.Run("short only", func(t *testing.T) {
+		options := NewEarlyOption('h', "")
+		if assert.Len(t, options, 1) {
+			assert.Equal(t, &Option{
+				Prefix: "-",
+				Name:   "h",
+				Type:   OptionTypeEarlyArgumentNone,
+			}, options[0])
+		}
+	})
+
+	t.Run("long only", func(t *testing.T) {
+		options := NewEarlyOption(0, "help")
+		if assert.Len(t, options, 1) {
+			assert.Equal(t, &Option{
+				Prefix: "--",
+				Name:   "help",
+				Type:   OptionTypeEarlyArgumentNone,
+			}, options[0])
+		}
+	})
+
+	t.Run("short and long", func(t *testing.T) {
+		options := NewEarlyOption('h', "help")
+		if assert.Len(t, options, 2) {
+			assert.Equal(t, &Option{
+				Prefix: "-",
+				Name:   "h",
+				Type:   OptionTypeEarlyArgumentNone,
+			}, options[0])
+			assert.Equal(t, &Option{
+				Prefix: "--",
+				Name:   "help",
+				Type:   OptionTypeEarlyArgumentNone,
+			}, options[1])
+		}
+	})
+
+	t.Run("no options", func(t *testing.T) {
+		options := NewEarlyOption(0, "")
+		assert.Nil(t, options)
+	})
+}
+
+func Test_NewOptionWithArgumentRequired(t *testing.T) {
+	t.Run("short only", func(t *testing.T) {
+		options := NewOptionWithArgumentRequired('o', "")
+		if assert.Len(t, options, 1) {
+			assert.Equal(t, &Option{
+				Prefix: "-",
+				Name:   "o",
+				Type:   OptionTypeGroupableArgumentRequired,
+			}, options[0])
+		}
+	})
+
+	t.Run("long only", func(t *testing.T) {
+		options := NewOptionWithArgumentRequired(0, "output")
+		if assert.Len(t, options, 1) {
+			assert.Equal(t, &Option{
+				Prefix: "--",
+				Name:   "output",
+				Type:   OptionTypeStandaloneArgumentRequired,
+			}, options[0])
+		}
+	})
+
+	t.Run("short and long", func(t *testing.T) {
+		options := NewOptionWithArgumentRequired('o', "output")
+		if assert.Len(t, options, 2) {
+			assert.Equal(t, &Option{
+				Prefix: "-",
+				Name:   "o",
+				Type:   OptionTypeGroupableArgumentRequired,
+			}, options[0])
+			assert.Equal(t, &Option{
+				Prefix: "--",
+				Name:   "output",
+				Type:   OptionTypeStandaloneArgumentRequired,
+			}, options[1])
+		}
+	})
+
+	t.Run("no options", func(t *testing.T) {
+		options := NewOptionWithArgumentRequired(0, "")
+		assert.Nil(t, options)
+	})
+}
+
+func Test_NewLongOptionWithArgumentOptional(t *testing.T) {
+	t.Run("no options", func(t *testing.T) {
+		assert.Nil(t, NewLongOptionWithArgumentOptional("", "gzip"))
+	})
+
+	t.Run("long only", func(t *testing.T) {
+		options := NewLongOptionWithArgumentOptional("compress", "gzip")
+		if assert.Len(t, options, 1) {
+			assert.Equal(t, &Option{
+				DefaultValue: "gzip",
+				Prefix:       "--",
+				Name:         "compress",
+				Type:         OptionTypeStandaloneArgumentOptional,
+			}, options[0])
+		}
+	})
+}

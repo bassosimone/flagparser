@@ -27,6 +27,13 @@ func TestErrTooManyPositionalArguments(t *testing.T) {
 	assert.Equal(t, want, err.Error())
 }
 
+func TestParser_AddOption(t *testing.T) {
+	px := NewParser()
+	option := &Option{Prefix: "--", Name: "verbose"}
+	px.AddOption(nil, option, nil)
+	assert.Equal(t, []*Option{option}, px.Options)
+}
+
 func TestParser_Parse(t *testing.T) {
 	// Note: example_test.go covers many parsing cases; this file focuses on
 	// configuration and error paths not easily expressed as examples.
@@ -78,13 +85,7 @@ func TestParser_Parse(t *testing.T) {
 				return &Parser{
 					MinPositionalArguments: 1,
 					MaxPositionalArguments: 4,
-					Options: []*Option{
-						{
-							Name:   "h",
-							Prefix: "-",
-							Type:   OptionTypeEarlyArgumentNone,
-						},
-					},
+					Options:                NewEarlyOption('h', ""),
 				}
 			},
 			expectValue: []string{"-h"},
@@ -97,13 +98,7 @@ func TestParser_Parse(t *testing.T) {
 				return &Parser{
 					MinPositionalArguments: 1,
 					MaxPositionalArguments: 4,
-					Options: []*Option{
-						{
-							Name:   "p",
-							Prefix: "-",
-							Type:   OptionTypeGroupableArgumentRequired,
-						},
-					},
+					Options:                NewOptionWithArgumentRequired('p', ""),
 				}
 			},
 			expectValue: nil,

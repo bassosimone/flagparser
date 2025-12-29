@@ -147,6 +147,20 @@ func (px *Parser) SetMinMaxPositionalArguments(minArgs, maxArgs int) {
 	px.MaxPositionalArguments = maxArgs
 }
 
+// AddOption adds one or more options to the parser.
+//
+// This method MUTATES [*Parser] and is NOT SAFE to call concurrently.
+//
+// Setting invalid option names (e.g., a duplicate option name) will cause
+// no errors until you attempt to parse the command line.
+func (px *Parser) AddOption(options ...*Option) {
+	for _, option := range options {
+		if option != nil {
+			px.Options = append(px.Options, option)
+		}
+	}
+}
+
 // AddOptionWithArgumentNone adds a short and long option taking no argument
 // and using the `-` and `--` prefixes, which follow the GNU conventions.
 //
@@ -158,21 +172,10 @@ func (px *Parser) SetMinMaxPositionalArguments(minArgs, maxArgs int) {
 //
 // Setting invalid option names (e.g., a duplicate option name) will cause
 // no errors until you attempt to parse the command line.
+//
+// Use [NewOptionWithArgumentNone] to construct options without mutating the parser.
 func (px *Parser) AddOptionWithArgumentNone(shortName byte, longName string) {
-	if shortName != 0 {
-		px.Options = append(px.Options, &Option{
-			Prefix: "-",
-			Name:   string(shortName),
-			Type:   OptionTypeGroupableArgumentNone,
-		})
-	}
-	if longName != "" {
-		px.Options = append(px.Options, &Option{
-			Prefix: "--",
-			Name:   longName,
-			Type:   OptionTypeStandaloneArgumentNone,
-		})
-	}
+	px.AddOption(NewOptionWithArgumentNone(shortName, longName)...)
 }
 
 // AddEarlyOption adds an "early" short and long option taking no argument and
@@ -190,21 +193,10 @@ func (px *Parser) AddOptionWithArgumentNone(shortName byte, longName string) {
 //
 // Setting invalid option names (e.g., a duplicate option name) will cause
 // no errors until you attempt to parse the command line.
+//
+// Use [NewEarlyOption] to construct options without mutating the parser.
 func (px *Parser) AddEarlyOption(shortName byte, longName string) {
-	if shortName != 0 {
-		px.Options = append(px.Options, &Option{
-			Prefix: "-",
-			Name:   string(shortName),
-			Type:   OptionTypeEarlyArgumentNone,
-		})
-	}
-	if longName != "" {
-		px.Options = append(px.Options, &Option{
-			Prefix: "--",
-			Name:   longName,
-			Type:   OptionTypeEarlyArgumentNone,
-		})
-	}
+	px.AddOption(NewEarlyOption(shortName, longName)...)
 }
 
 // AddOptionWithArgumentRequired adds a short and long option with a required argument
@@ -218,21 +210,10 @@ func (px *Parser) AddEarlyOption(shortName byte, longName string) {
 //
 // Setting invalid option names (e.g., a duplicate option name) will cause
 // no errors until you attempt to parse the command line.
+//
+// Use [NewOptionWithArgumentRequired] to construct options without mutating the parser.
 func (px *Parser) AddOptionWithArgumentRequired(shortName byte, longName string) {
-	if shortName != 0 {
-		px.Options = append(px.Options, &Option{
-			Prefix: "-",
-			Name:   string(shortName),
-			Type:   OptionTypeGroupableArgumentRequired,
-		})
-	}
-	if longName != "" {
-		px.Options = append(px.Options, &Option{
-			Prefix: "--",
-			Name:   longName,
-			Type:   OptionTypeStandaloneArgumentRequired,
-		})
-	}
+	px.AddOption(NewOptionWithArgumentRequired(shortName, longName)...)
 }
 
 // AddLongOptionWithArgumentOptional adds a long option with an optional argument
@@ -245,15 +226,10 @@ func (px *Parser) AddOptionWithArgumentRequired(shortName byte, longName string)
 //
 // Setting invalid option names (e.g., a duplicate option name) will cause
 // no errors until you attempt to parse the command line.
+//
+// Use [NewLongOptionWithArgumentOptional] to construct options without mutating the parser.
 func (px *Parser) AddLongOptionWithArgumentOptional(longName, defaultValue string) {
-	if longName != "" {
-		px.Options = append(px.Options, &Option{
-			DefaultValue: defaultValue,
-			Prefix:       "--",
-			Name:         longName,
-			Type:         OptionTypeStandaloneArgumentOptional,
-		})
-	}
+	px.AddOption(NewLongOptionWithArgumentOptional(longName, defaultValue)...)
 }
 
 // Parse parses the command line arguments.
