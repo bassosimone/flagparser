@@ -16,7 +16,7 @@ To parse arguments, you need to:
  1. Create a [*Parser] instance (typically using the [NewParser] factory).
 
  2. Initialize its options (e.g., with [*Parser.AddOptionWithArgumentNone] or by
-    appending [Option] values to the [*Parser] instance.).
+    appending [*Option] values to the [*Parser] instance.).
 
  3. Optionally, adjust the separator, permutation, and prefixes to match the
     desired command-line convention.
