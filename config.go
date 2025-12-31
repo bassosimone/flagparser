@@ -140,11 +140,13 @@ func newConfig(px *Parser) (*config, error) {
 
 	// Collect unique prefixes, ensure they are used consistently across
 	// standalone and groupable options, and configure the scanner for
-	// scanning them. Note that we treat the early options as a special case
-	// since they are checked ahead of proper parsing.
+	// scanning them. Note that we treat the early options uniformly as
+	// any other option, given that now we scan them as well.
 	prefixes := make(map[string]OptionType)
 	for _, opt := range px.Options {
 		switch {
+		case opt.Type.isEarly():
+			prefixes[opt.Prefix] |= optionKindEarly
 		case opt.Type.isGroupable():
 			prefixes[opt.Prefix] |= optionKindGroupable
 		case opt.Type.isStandalone():

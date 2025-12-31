@@ -16,12 +16,9 @@ func earlyParse(options []*Option, tokens []flagscanner.Token) (Value, bool) {
 	for _, tok := range tokens {
 		switch tok := tok.(type) {
 		case flagscanner.OptionToken:
-			tokStr := tok.String() // gives us e.g. `--help`
-
 			// 2. process each option
 			for _, option := range options {
-				optStr := option.Prefix + option.Name // gives us e.g. `--help`
-				if option.Type.isEarly() && tokStr == optStr {
+				if option.Type.isEarly() && tok.Prefix == option.Prefix && tok.Name == option.Name {
 
 					// We have found the early option, return it
 					eopt := ValueOption{

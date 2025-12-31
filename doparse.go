@@ -104,7 +104,11 @@ func doParse(cfg *config, input *deque[flagscanner.Token], options, positionals 
 				continue
 			}
 
-			// Switch on the kind of flag based on standalone vs groupable
+			// Switch on the kind of flag based on standalone vs groupable vs early.
+			//
+			// Note that we can take the early path if an option prefix only exists for early
+			// options (for example if we use `+` for long options, `-` for short
+			// options but we also want to handle `--help` as an early option).
 			optkind := cfg.prefixes[cur.Prefix]
 			switch {
 			case optkind.isStandalone():
@@ -116,6 +120,14 @@ func doParse(cfg *config, input *deque[flagscanner.Token], options, positionals 
 				if err := doParseGroupableOption(cfg, cur, input, options); err != nil {
 					return err
 				}
+
+			case optkind.isEarly():
+				// So, if we end up here it means that we have seen a token with a prefix
+				// used for early options only. However, conceptually speaking, introducing
+				// a prefix for early options implies that the prefix exist. As such, we
+				// treat this corner case as an unknown option with a known prefix.
+				fmt.Fprintf(parseDebugWriter, "error: no early|groupable option for token: %+v\n", cur)
+				return ErrUnknownOption{Name: cur.Name, Prefix: cur.Prefix, Token: cur}
 
 			default:
 				panic(fmt.Sprintf("unhandled option type: %d", optkind))
@@ -141,6 +153,7 @@ func doParseStandaloneOption(
 	// Obtain the option given its name and prefix
 	option, err := cfg.findOption(cur, optname, optionKindStandalone)
 	if err != nil {
+		fmt.Fprintf(parseDebugWriter, "error: cannot find standalone option: %+q\n", optname)
 		return err
 	}
 	fmt.Fprintf(parseDebugWriter, "found option: %+v\n", option)
@@ -190,6 +203,7 @@ func doParseGroupableOption(
 		// Obtain the option given its name and prefix
 		option, err := cfg.findOption(cur, string(optname), optionKindGroupable)
 		if err != nil {
+			fmt.Fprintf(parseDebugWriter, "error: cannot find groupable option: %q\n", string(optname))
 			return err
 		}
 		fmt.Fprintf(parseDebugWriter, "found option: %+v\n", option)

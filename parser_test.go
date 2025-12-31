@@ -93,6 +93,54 @@ func TestParser_Parse(t *testing.T) {
 		},
 
 		{
+			// Regression: early options should be recognized even when only long
+			// options are configured, otherwise "-h" is tokenized as a positional.
+			args: []string{"-h"},
+			newParser: func() *Parser {
+				return &Parser{
+					MinPositionalArguments: 0,
+					MaxPositionalArguments: 0,
+					Options: append(
+						NewOptionWithArgumentNone(0, "verbose"),
+						NewEarlyOption('h', "")...,
+					),
+				}
+			},
+			expectValue: []string{"-h"},
+			expectErr:   nil,
+		},
+
+		{
+			// Regression: early options should be recognized even when only short
+			// options are configured, otherwise "--help" is tokenized as a positional.
+			args: []string{"--help"},
+			newParser: func() *Parser {
+				return &Parser{
+					MinPositionalArguments: 0,
+					MaxPositionalArguments: 0,
+					Options: append(
+						NewOptionWithArgumentNone('v', ""),
+						NewEarlyOption(0, "help")...,
+					),
+				}
+			},
+			expectValue: []string{"--help"},
+			expectErr:   nil,
+		},
+
+		{
+			// Regression: early-only prefixes should not trigger panics on unknown options.
+			args: []string{"-x"},
+			newParser: func() *Parser {
+				return &Parser{
+					Options: NewEarlyOption('h', ""),
+				}
+			},
+			expectValue: []string{},
+			expectErr:   errors.New("unknown option: -x"),
+		},
+
+		{
 			args: []string{"@8.8.8.8", "-P53", "IN", "+short", "A"},
 			newParser: func() *Parser {
 				return &Parser{

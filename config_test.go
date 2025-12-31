@@ -339,8 +339,8 @@ func Test_newConfig(t *testing.T) {
 			},
 			expectErr: nil,
 			expectPrefixes: map[string]OptionType{
-				"--": optionKindStandalone,
-				"-":  optionKindGroupable,
+				"--": optionKindStandalone | optionKindEarly,
+				"-":  optionKindGroupable | optionKindEarly,
 			},
 			expectOptions: map[string]*Option{
 				"h": {
