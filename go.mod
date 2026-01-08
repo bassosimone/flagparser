@@ -3,8 +3,8 @@ module github.com/bassosimone/flagparser
 go 1.25.5
 
 require (
-	github.com/bassosimone/flagscanner v0.0.0-20251227135253-cf7a31624729
-	github.com/bassosimone/runtimex v0.0.0-20251217192325-70882b9ab4d3
+	github.com/bassosimone/flagscanner v0.0.0-20260108162002-6d1877e940ce
+	github.com/bassosimone/runtimex v0.0.0-20260108162100-336f3823f6b7
 	github.com/stretchr/testify v1.11.1
 )
 
