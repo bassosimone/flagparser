@@ -261,7 +261,7 @@ func (px *Parser) Parse(args []string) ([]Value, error) {
 	// immediately intercepting `--help` regardless of possibly invalid
 	// options, which, in turn, improves the UX, because we can show
 	// the full help to the user rather than errors.
-	if value, found := earlyParse(px.Options, tokens); found {
+	if value, found := earlyParse(px.Options, tokens, px.DisablePermute); found {
 		return []Value{value}, nil
 	}
 

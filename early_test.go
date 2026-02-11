@@ -106,7 +106,7 @@ func Test_earlyFind(t *testing.T) {
 
 	for _, tc := range cases {
 		t.Run(tc.name, func(t *testing.T) {
-			value, found := earlyParse(options, tc.tokens)
+			value, found := earlyParse(options, tc.tokens, false)
 			expectFound := tc.expect != nil
 			assert.True(t, found == expectFound)
 			assert.Equal(t, tc.expect, value)

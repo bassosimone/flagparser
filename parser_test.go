@@ -276,6 +276,24 @@ func TestParser_Parse(t *testing.T) {
 			expectValue: nil,
 			expectErr:   errors.New("prefix \"-\" is used for both standalone and groupable options"),
 		},
+
+		// Note: with DisablePermute, early options after a positional
+		// should not be recognized: the positional boundary should
+		// stop early option scanning just like it stops normal parsing.
+		{
+			args: []string{"tcpconnect", "--help"},
+			newParser: func() *Parser {
+				return &Parser{
+					DisablePermute:            true,
+					MinPositionalArguments:    1,
+					MaxPositionalArguments:    math.MaxInt,
+					OptionsArgumentsSeparator: "--",
+					Options:                   NewEarlyOption('h', "help"),
+				}
+			},
+			expectValue: []string{"tcpconnect", "--help"},
+			expectErr:   nil,
+		},
 	}
 
 	for _, tc := range cases {

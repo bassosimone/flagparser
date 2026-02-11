@@ -11,7 +11,11 @@ import "github.com/bassosimone/flagscanner"
 // earlyParse parses the early options. That is, the options that should
 // be recognized immediately even when the rest of the command line is
 // wrong. The `--help` option is the most typical early option we handle.
-func earlyParse(options []*Option, tokens []flagscanner.Token) (Value, bool) {
+//
+// When disablePermute is true, we stop scanning as soon as we encounter
+// a positional argument, mirroring the normal parsing behavior where a
+// positional stops option recognition.
+func earlyParse(options []*Option, tokens []flagscanner.Token, disablePermute bool) (Value, bool) {
 	// 1. process each token and only consider the option tokens
 	for _, tok := range tokens {
 		switch tok := tok.(type) {
@@ -31,8 +35,10 @@ func earlyParse(options []*Option, tokens []flagscanner.Token) (Value, bool) {
 				}
 			}
 
-		default:
-			// nothing
+		case flagscanner.PositionalArgumentToken:
+			if disablePermute {
+				return nil, false
+			}
 		}
 	}
 	return nil, false
