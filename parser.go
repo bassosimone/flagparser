@@ -280,17 +280,26 @@ func (px *Parser) Parse(args []string) ([]Value, error) {
 	// Ensure this stage has emptied the input deque.
 	runtimex.Assert(input.Empty())
 
-	// Ensure the number of positional arguments is within the limits.
-	if len(positionals.values) < px.MinPositionalArguments {
-		return nil, ErrTooFewPositionalArguments{
-			Min:  px.MinPositionalArguments,
-			Have: len(positionals.values),
+	// Ensure the number of positional arguments is within the limits. The
+	// options-arguments separator is held in the same deque so its index is
+	// preserved for round-tripping consumers, but per GNU/POSIX it is a
+	// delimiter and not itself a positional — exclude it from the count.
+	nPositional := 0
+	for _, v := range positionals.values {
+		if _, ok := v.(ValueOptionsArgumentsSeparator); !ok {
+			nPositional++
 		}
 	}
-	if len(positionals.values) > px.MaxPositionalArguments {
+	if nPositional < px.MinPositionalArguments {
+		return nil, ErrTooFewPositionalArguments{
+			Min:  px.MinPositionalArguments,
+			Have: nPositional,
+		}
+	}
+	if nPositional > px.MaxPositionalArguments {
 		return nil, ErrTooManyPositionalArguments{
 			Max:  px.MaxPositionalArguments,
-			Have: len(positionals.values),
+			Have: nPositional,
 		}
 	}
 

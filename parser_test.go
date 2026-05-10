@@ -319,6 +319,86 @@ func TestParser_Parse(t *testing.T) {
 	}
 }
 
+// TestParser_SeparatorDoesNotCountTowardArity is a regression guard for a
+// real bug: the "--" options-arguments separator was being pushed into the
+// same deque as positional arguments and then counted against
+// Min/MaxPositionalArguments. That broke callers that armed "--" as a
+// hardening boundary against argv injection — e.g., `cmd -- a b` against a
+// 2-positional spec was rejected as "got 3". Per GNU/POSIX, "--" is a
+// delimiter, not an argument; the arity check must skip it.
+func TestParser_SeparatorDoesNotCountTowardArity(t *testing.T) {
+	type testcase struct {
+		name        string
+		args        []string
+		min, max    int
+		expectValue []string
+		expectErr   error
+	}
+	cases := []testcase{
+		{
+			name:        "separator + exactly Max positionals is accepted",
+			args:        []string{"--", "a", "b"},
+			min:         0,
+			max:         2,
+			expectValue: []string{"--", "a", "b"},
+			expectErr:   nil,
+		},
+		{
+			name:        "separator + exactly Min positionals is accepted",
+			args:        []string{"--", "a"},
+			min:         1,
+			max:         math.MaxInt,
+			expectValue: []string{"--", "a"},
+			expectErr:   nil,
+		},
+		{
+			name:        "separator with zero positionals respects Min",
+			args:        []string{"--"},
+			min:         1,
+			max:         math.MaxInt,
+			expectValue: nil,
+			expectErr:   ErrTooFewPositionalArguments{Min: 1, Have: 0},
+		},
+		{
+			name:        "separator + Max+1 positionals still fails Max",
+			args:        []string{"--", "a", "b", "c"},
+			min:         0,
+			max:         2,
+			expectValue: nil,
+			expectErr:   ErrTooManyPositionalArguments{Max: 2, Have: 3},
+		},
+		{
+			name:        "separator at the end (no following positionals) does not inflate count",
+			args:        []string{"a", "b", "--"},
+			min:         2,
+			max:         2,
+			expectValue: []string{"a", "b", "--"},
+			expectErr:   nil,
+		},
+	}
+	for _, tc := range cases {
+		t.Run(tc.name, func(t *testing.T) {
+			px := &Parser{
+				MinPositionalArguments:    tc.min,
+				MaxPositionalArguments:    tc.max,
+				OptionsArgumentsSeparator: "--",
+			}
+			values, err := px.Parse(tc.args)
+			if tc.expectErr != nil {
+				assert.Equal(t, tc.expectErr, err)
+				assert.Nil(t, values)
+				return
+			}
+			assert.NoError(t, err)
+			got := []string{}
+			for _, entry := range values {
+				got = append(got, entry.Strings()...)
+			}
+			assert.Equal(t, tc.expectValue, got)
+		})
+	}
+}
+
 func TestParserEmptyDefaultsToGNUStyleOptions(t *testing.T) {
 	// Create a new empty parser with no options
 	px := &Parser{}
