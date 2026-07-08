@@ -1,7 +1,7 @@
-github.com/bassosimone/flagscanner v0.0.0-20260615112222-a68f4ee842c2 h1:pDUS2o9S8Q3vBWdA4+6YsvoMBa7YDcpNaIfcRrQmayg=
-github.com/bassosimone/flagscanner v0.0.0-20260615112222-a68f4ee842c2/go.mod h1:rNk3EiWuBQknQM0tuUa5DK0g7JxcVCLaCyCmnCcDlTk=
-github.com/bassosimone/runtimex v0.0.0-20260615112505-ee72c4f0769e h1:J3ERL+Iben+Aog/hfy+qcRuhzH6dZceq/v1GuEyqlPA=
-github.com/bassosimone/runtimex v0.0.0-20260615112505-ee72c4f0769e/go.mod h1:GDr46yuJzuDkzOMI1/9Voo3s7VmYBU/6pkuaI5FR7gE=
+github.com/bassosimone/flagscanner v0.0.0-20260708082732-b5cac5102a3e h1:m6ZgGjFFw8u3Szacktu45e474PiLmm/gJHaeqDKOmI4=
+github.com/bassosimone/flagscanner v0.0.0-20260708082732-b5cac5102a3e/go.mod h1:rNk3EiWuBQknQM0tuUa5DK0g7JxcVCLaCyCmnCcDlTk=
+github.com/bassosimone/runtimex v0.0.0-20260708083610-01df83158243 h1:eqkVFAGD50avpsTGPI65++xpau6lWtud+pPhFergzBM=
+github.com/bassosimone/runtimex v0.0.0-20260708083610-01df83158243/go.mod h1:GDr46yuJzuDkzOMI1/9Voo3s7VmYBU/6pkuaI5FR7gE=
 github.com/davecgh/go-spew v1.1.1 h1:vj9j/u1bqnvCEfJOwUhtlOARqs3+rkHYY13jYWTU97c=
 github.com/davecgh/go-spew v1.1.1/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
 github.com/pmezard/go-difflib v1.0.0 h1:4DBwDE0NGyQoBHbLQYPwSUPoCMWR5BEzIk/f1lZbAQM=
