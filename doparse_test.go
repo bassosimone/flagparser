@@ -136,6 +136,41 @@ func Test_doParse(t *testing.T) {
 		assert.Equal(t, []string{"file1.txt", "--verbose"}, pos)
 	})
 
+	t.Run("disable permute turns later separator into positional", func(t *testing.T) {
+		cfg := newTestDoParseConfig()
+		cfg.parser.DisablePermute = true
+		input := &deque[flagscanner.Token]{values: []flagscanner.Token{
+			flagscanner.PositionalArgumentToken{Idx: 1, Value: "file1.txt"},
+			flagscanner.OptionsArgumentsSeparatorToken{Idx: 2, Separator: "--"},
+			flagscanner.PositionalArgumentToken{Idx: 3, Value: "file2.txt"},
+		}}
+		var options, positionals deque[Value]
+		err := doParse(cfg, input, &options, &positionals)
+		assert.NoError(t, err)
+		assert.Empty(t, options.values)
+
+		// We assert on the raw values rather than using parseTokens because
+		// both value types stringify to `--`: the point here is pinning that
+		// a separator following a positional in no-permute mode becomes a
+		// [ValuePositionalArgument], which counts toward arity, rather than
+		// a [ValueOptionsArgumentsSeparator], which does not.
+		expect := []Value{
+			ValuePositionalArgument{
+				Tok:   flagscanner.PositionalArgumentToken{Idx: 1, Value: "file1.txt"},
+				Value: "file1.txt",
+			},
+			ValuePositionalArgument{
+				Tok:   flagscanner.OptionsArgumentsSeparatorToken{Idx: 2, Separator: "--"},
+				Value: "--",
+			},
+			ValuePositionalArgument{
+				Tok:   flagscanner.PositionalArgumentToken{Idx: 3, Value: "file2.txt"},
+				Value: "file2.txt",
+			},
+		}
+		assert.Equal(t, expect, positionals.values)
+	})
+
 	t.Run("separator turns later options into positionals", func(t *testing.T) {
 		cfg := newTestDoParseConfig()
 		cfg.parser.DisablePermute = false

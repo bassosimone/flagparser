@@ -81,6 +81,25 @@ func doParse(cfg *config, input *deque[flagscanner.Token], options, positionals 
 
 		// Stop parsing if we encounter the options-arguments separator
 		case flagscanner.OptionsArgumentsSeparatorToken:
+			// When we're treating everything as positional, the separator is a
+			// literal argument. This mirrors POSIX-mode getopt(3) (leading `+`
+			// in optstring or POSIXLY_CORRECT): option processing stops at the
+			// first operand, so a later `--` is never consumed as a delimiter.
+			//
+			// Note that this branch is only reachable when disablePermute sets
+			// onlypositionals: the scanner emits at most one separator token
+			// and turns everything after it into positional tokens.
+			if onlypositionals {
+				value := ValuePositionalArgument{
+					Tok:   cur,
+					Value: cur.String(),
+				}
+				positionals.PushBack(value)
+				fmt.Fprintf(parseDebugWriter, "added separator as positional value: %+v\n", value)
+				continue
+			}
+
+			// Otherwise insert a proper options-arguments separator
 			value := ValueOptionsArgumentsSeparator{
 				Tok:       cur,
 				Separator: cur.Separator,

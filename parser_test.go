@@ -326,13 +326,19 @@ func TestParser_Parse(t *testing.T) {
 // hardening boundary against argv injection — e.g., `cmd -- a b` against a
 // 2-positional spec was rejected as "got 3". Per GNU/POSIX, "--" is a
 // delimiter, not an argument; the arity check must skip it.
+//
+// Note the exception: with DisablePermute, a "--" that follows a positional
+// argument no longer functions as a delimiter. POSIX-mode getopt(3) stops
+// option processing at the first operand, so such a "--" is a literal
+// argument and DOES count toward arity (see doParse).
 func TestParser_SeparatorDoesNotCountTowardArity(t *testing.T) {
 	type testcase struct {
-		name        string
-		args        []string
-		min, max    int
-		expectValue []string
-		expectErr   error
+		name           string
+		args           []string
+		disablePermute bool
+		min, max       int
+		expectValue    []string
+		expectErr      error
 	}
 	cases := []testcase{
 		{
@@ -375,10 +381,29 @@ func TestParser_SeparatorDoesNotCountTowardArity(t *testing.T) {
 			expectValue: []string{"a", "b", "--"},
 			expectErr:   nil,
 		},
+		{
+			name:           "no permute: separator after a positional counts toward Max",
+			args:           []string{"a", "--", "b"},
+			disablePermute: true,
+			min:            0,
+			max:            2,
+			expectValue:    nil,
+			expectErr:      ErrTooManyPositionalArguments{Max: 2, Have: 3},
+		},
+		{
+			name:           "no permute: separator after a positional counts toward Min",
+			args:           []string{"a", "--", "b"},
+			disablePermute: true,
+			min:            3,
+			max:            3,
+			expectValue:    []string{"a", "--", "b"},
+			expectErr:      nil,
+		},
 	}
 	for _, tc := range cases {
 		t.Run(tc.name, func(t *testing.T) {
 			px := &Parser{
+				DisablePermute:            tc.disablePermute,
 				MinPositionalArguments:    tc.min,
 				MaxPositionalArguments:    tc.max,
 				OptionsArgumentsSeparator: "--",
